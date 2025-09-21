@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UML Class Diagram Maker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style type="text/tailwindcss">
+        @layer base {
+            body {
+                font-family: 'Inter', sans-serif;
+            }
+        }
+        @layer components {
+        .tab-button {
+            @apply flex items-center justify-center gap-2 flex-1 cursor-pointer py-3 px-4 border-b-2 font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors duration-200;
+        }
+        .tab-button.active {
+            color: var(--color-accent);
+            border-color: var(--color-accent);
+            background-color: var(--color-accent-light);
+        }
+        .form-input, .form-select {
+            @apply w-full px-4 py-2 bg-white border-2 border-slate-200 rounded-lg shadow-inner focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all duration-200 ease-in-out;
+        }
+        .form-input::placeholder { @apply text-slate-400; }
+        .btn {
+            @apply flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-white border border-transparent shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+        }
+        .btn-primary {
+            @apply bg-gradient-to-br from-indigo-500 to-indigo-600 border-indigo-700 hover:from-indigo-600 hover:to-indigo-700 focus:ring-indigo-500;
+        }
+        .btn-danger {
+            @apply bg-gradient-to-br from-red-500 to-red-600 border-red-700 hover:from-red-600 hover:to-red-700 focus:ring-red-500;
+        }
+        .btn-secondary {
+            @apply bg-gradient-to-br from-slate-600 to-slate-700 border-slate-800 hover:from-slate-700 hover:to-slate-800 focus:ring-slate-500;
+        }
+    }
+        :root {
+            --color-primary: #f8fafc; /* light slate */
+            --color-secondary: #ffffff;
+            --color-accent: #4f46e5; /* indigo */
+            --color-accent-light: #e0e7ff;
+            --color-text-primary: #1e293b;
+            --color-text-secondary: #475569;
+            --color-border: #e2e8f0;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased overflow-hidden">
+    <div class="flex flex-col md:flex-row h-screen">
+        <!-- Sidebar -->
+        <aside class="w-full md:w-80 lg:w-96 bg-white border-r border-slate-200 flex flex-col">
+            <header class="p-4 border-b border-slate-200">
+                <h1 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600"><path d="M12 12v-2a2 2 0 1 1 4 0v2"></path><path d="M12 12h-2a2 2 0 1 0 0 4h2"></path><path d="M12 12v6"></path><path d="M12 12h6"></path><path d="M18 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"></path><path d="M6 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"></path><path d="M6 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"></path></svg>
+                    UML Diagram Editor
+                </h1>
+            </header>
+            
+            <!-- Tabs -->
+            <div class="flex flex-wrap border-b border-slate-200">
+                <div class="tab-button" data-tab="create">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                    <span>Create</span>
+                </div>
+                <div class="tab-button" data-tab="manage">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9"></path><path d="M14 17H5"></path><circle cx="17" cy="17" r="3"></circle><circle cx="7" cy="7" r="3"></circle></svg>
+                    <span>Manage</span>
+                </div>
+                <div class="tab-button" data-tab="relationships">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"></path></svg>
+                    <span>Relationships</span>
+                </div>
+                 <div class="tab-button" data-tab="share">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    <span>Share</span>
+                </div>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="p-4 space-y-6 overflow-y-auto flex-grow min-h-0">
+                <!-- Create Tab -->
+                <div id="create-tab" class="tab-content space-y-4">
+                    <h2 class="text-lg font-semibold text-slate-700">New Class</h2>
+                    <div>
+                        <label for="className" class="block text-sm font-medium text-slate-600 mb-1">Class Name</label>
+                        <input type="text" id="className" class="form-input" placeholder="e.g., Animal">
+                    </div>
+                    <div>
+                        <label for="classType" class="block text-sm font-medium text-slate-600 mb-1">Class Type</label>
+                        <select id="classType" class="form-select">
+                            <option value="NORMAL">Normal Class</option>
+                            <option value="ABSTRACT">Abstract Class</option>
+                            <option value="INTERFACE">Interface</option>
+                        </select>
+                    </div>
+                    <button id="createClassBtn" class="btn btn-primary w-full">Create Class</button>
+                </div>
+
+                <!-- Manage Tab -->
+                <div id="manage-tab" class="tab-content hidden space-y-4">
+                    <h2 class="text-lg font-semibold text-slate-700">Manage Classes</h2>
+                    <div>
+                        <label for="classSelector" class="block text-sm font-medium text-slate-600 mb-1">Select Class</label>
+                        <select id="classSelector" class="form-select"></select>
+                    </div>
+                    <div id="management-panel" class="hidden space-y-4 pt-4 border-t border-slate-200">
+                        <!-- Add Attribute/Method Form -->
+                        <div class="bg-slate-50 p-3 rounded-lg space-y-3">
+                             <h3 class="font-semibold text-slate-600">Add Member</h3>
+                             <select id="memberType" class="form-select text-sm">
+                                <option value="attribute">Attribute</option>
+                                <option value="method">Method</option>
+                            </select>
+                            <div class="flex items-center gap-2">
+                               <select id="memberVisibility" class="form-select w-1/4 text-sm">
+                                    <option value="+">+</option>
+                                    <option value="-">-</option>
+                                    <option value="#">#</option>
+                                    <option value="~">~</option>
+                                </select>
+                                <input type="text" id="memberName" class="form-input" placeholder="e.g., name: String">
+                            </div>
+                            <div id="methodOptions" class="hidden">
+                                <label class="flex items-center text-sm">
+                                    <input type="checkbox" id="isAbstractMethod" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                    <span class="ml-2 text-slate-600">Abstract Method</span>
+                                </label>
+                            </div>
+                            <button id="addMemberBtn" class="btn btn-secondary w-full text-sm">Add Member</button>
+                        </div>
+                        
+                        <!-- Members List -->
+                        <div class="space-y-2">
+                            <h3 class="font-semibold text-slate-600">Attributes</h3>
+                            <ul id="attributesList" class="text-sm text-slate-600 list-none space-y-1"></ul>
+                            <h3 class="font-semibold text-slate-600 mt-2">Methods</h3>
+                            <ul id="methodsList" class="text-sm text-slate-600 list-none space-y-1"></ul>
+                        </div>
+                        <button id="deleteClassBtn" class="btn btn-danger w-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            Delete Selected Class
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Relationships Tab -->
+                <div id="relationships-tab" class="tab-content hidden space-y-4">
+                    <h2 class="text-lg font-semibold text-slate-700">Create Relationship</h2>
+                    <div>
+                        <label for="fromClass" class="block text-sm font-medium text-slate-600 mb-1">From</label>
+                        <select id="fromClass" class="form-select"></select>
+                    </div>
+                    <div>
+                        <label for="toClass" class="block text-sm font-medium text-slate-600 mb-1">To</label>
+                        <select id="toClass" class="form-select"></select>
+                    </div>
+                    <div>
+                        <label for="relationshipType" class="block text-sm font-medium text-slate-600 mb-1">Type</label>
+                        <select id="relationshipType" class="form-select">
+                            <option value="ASSOCIATION">Association</option>
+                            <option value="AGGREGATION">Aggregation</option>
+                            <option value="COMPOSITION">Composition</option>
+                            <option value="INHERITANCE">Inheritance</option>
+                            <option value="REALIZATION">Realization</option>
+                        </select>
+                    </div>
+                    <button id="createRelationshipBtn" class="btn btn-primary w-full">Create Relationship</button>
+                </div>
+
+                <!-- Share Tab -->
+                <div id="share-tab" class="tab-content hidden space-y-4">
+                     <h2 class="text-lg font-semibold text-slate-700">Import / Export</h2>
+                    <p class="text-sm text-slate-500">Share or save your diagram state using JSON.</p>
+                    <div>
+                        <textarea id="json-io" class="w-full h-32 form-input font-mono text-xs" placeholder="Paste JSON here to import..."></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="exportJsonBtn" class="btn btn-primary">Copy JSON</button>
+                        <button id="importJsonBtn" class="btn btn-secondary">Import JSON</button>
+                        <button id="saveLocalBtn" class="btn btn-primary">Save Local</button>
+                        <button id="loadLocalBtn" class="btn btn-secondary">Load Local</button>
+                    </div>
+                </div>
+            </div>
+             <!-- Toast Notification -->
+            <div id="toast" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-xl translate-y-20 opacity-0 transition-all duration-300">
+                Toast message
+            </div>
+        </aside>
+
+        <!-- Main Canvas -->
+        <main class="flex-grow bg-slate-50">
+             <canvas id="uml-canvas"></canvas>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DOM Elements ---
+        const canvas = document.getElementById('uml-canvas');
+        const ctx = canvas.getContext('2d');
+        const tabs = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        // --- UI Controls ---
+        const createClassBtn = document.getElementById('createClassBtn');
+        const classNameInput = document.getElementById('className');
+        const classTypeSelect = document.getElementById('classType');
+        const classSelector = document.getElementById('classSelector');
+        const managementPanel = document.getElementById('management-panel');
+        const memberTypeSelect = document.getElementById('memberType');
+        const memberVisibilitySelect = document.getElementById('memberVisibility');
+        const memberNameInput = document.getElementById('memberName');
+        const isAbstractMethodCheckbox = document.getElementById('isAbstractMethod');
+        const methodOptionsDiv = document.getElementById('methodOptions');
+        const addMemberBtn = document.getElementById('addMemberBtn');
+        const attributesList = document.getElementById('attributesList');
+        const methodsList = document.getElementById('methodsList');
+        const deleteClassBtn = document.getElementById('deleteClassBtn');
+        const fromClassSelect = document.getElementById('fromClass');
+        const toClassSelect = document.getElementById('toClass');
+        const relationshipTypeSelect = document.getElementById('relationshipType');
+        const createRelationshipBtn = document.getElementById('createRelationshipBtn');
+        const jsonIOTextarea = document.getElementById('json-io');
+        const exportJsonBtn = document.getElementById('exportJsonBtn');
+        const importJsonBtn = document.getElementById('importJsonBtn');
+        const saveLocalBtn = document.getElementById('saveLocalBtn');
+        const loadLocalBtn = document.getElementById('loadLocalBtn');
+        const toast = document.getElementById('toast');
+
+        // --- Application State ---
+        let classes = [];
+        let relationships = [];
+        let draggingClass = null;
+        let offsetX, offsetY;
+
+        // --- Constants ---
+        const PADDING = 10;
+        const HEADER_HEIGHT = 30;
+        const LINE_HEIGHT = 20;
+        const MIN_WIDTH = 150;
+
+        // --- Canvas Setup ---
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            draw();
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // --- Utility Functions ---
+        const showToast = (message, isError = false) => {
+            toast.textContent = message;
+            toast.style.backgroundColor = isError ? '#ef4444' : '#22c55e'; // red-500 or green-500
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        };
+
+        const generateId = () => `id_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        // --- Drawing Functions ---
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            relationships.forEach(drawRelationship);
+            classes.forEach(drawClass);
+        }
+
+        function calculateClassDimensions(cls) {
+            ctx.font = '14px Inter';
+            let width = MIN_WIDTH;
+            const nameWidth = ctx.measureText(cls.name).width + (PADDING * 4);
+            const stereotype = getStereotype(cls.type);
+            const stereotypeWidth = stereotype ? ctx.measureText(stereotype).width + (PADDING * 2) : 0;
+            width = Math.max(width, nameWidth, stereotypeWidth);
+
+            [...cls.attributes, ...cls.methods].forEach(member => {
+                const memberText = formatMember(member);
+                const memberWidth = ctx.measureText(memberText).width + PADDING * 2;
+                if (memberWidth > width) width = memberWidth;
+            });
+
+            const attributesHeight = cls.attributes.length * LINE_HEIGHT;
+            const methodsHeight = cls.methods.length * LINE_HEIGHT;
+            const height = HEADER_HEIGHT + attributesHeight + methodsHeight + PADDING * 2 + (stereotype ? 15 : 0);
+            
+            cls.width = width;
+            cls.height = height;
+        }
+        
+        function getStereotype(type) {
+             switch (type) {
+                case 'ABSTRACT': return '«abstract»';
+                case 'INTERFACE': return '«interface»';
+                default: return '';
+            }
+        }
+
+        function drawClass(cls) {
+            calculateClassDimensions(cls);
+
+            // Draw shadow
+            ctx.shadowColor = 'rgba(0,0,0,0.1)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 4;
+
+            // Draw class box
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.roundRect(cls.x, cls.y, cls.width, cls.height, 8);
+            ctx.fill();
+            ctx.stroke();
+
+            // Reset shadow
+            ctx.shadowColor = 'transparent';
+
+            let y = cls.y;
+            
+            // Draw stereotype
+            const stereotype = getStereotype(cls.type);
+            if (stereotype) {
+                ctx.font = 'italic 12px Inter';
+                ctx.fillStyle = '#475569';
+                ctx.textAlign = 'center';
+                ctx.fillText(stereotype, cls.x + cls.width / 2, y + PADDING + 4);
+                y += 15;
+            }
+
+            // Draw class name
+            const isAbstractOrInterface = cls.type === 'ABSTRACT' || cls.type === 'INTERFACE';
+            ctx.font = `bold ${isAbstractOrInterface ? 'italic ' : ''}16px Inter`;
+            ctx.fillStyle = '#1e293b';
+            ctx.textAlign = 'center';
+            ctx.fillText(cls.name, cls.x + cls.width / 2, y + HEADER_HEIGHT / 2 + 5);
+
+            y += HEADER_HEIGHT;
+
+            // Draw separator
+            ctx.beginPath();
+            ctx.moveTo(cls.x, y);
+            ctx.lineTo(cls.x + cls.width, y);
+            ctx.stroke();
+
+            // Draw attributes
+            ctx.textAlign = 'left';
+            ctx.font = '14px Inter';
+            cls.attributes.forEach(attr => {
+                y += LINE_HEIGHT;
+                ctx.fillStyle = '#334155';
+                ctx.fillText(formatMember(attr), cls.x + PADDING, y);
+            });
+
+            // Draw separator if there are both attributes and methods
+            if (cls.attributes.length > 0 && cls.methods.length > 0) {
+                y += PADDING/2;
+                ctx.beginPath();
+                ctx.moveTo(cls.x, y);
+                ctx.lineTo(cls.x + cls.width, y);
+                ctx.stroke();
+                y += PADDING/2;
+            }
+
+            // Draw methods
+            cls.methods.forEach(method => {
+                y += LINE_HEIGHT;
+                ctx.fillStyle = '#334155';
+                const isMethodAbstract = method.isAbstract || cls.type === 'INTERFACE';
+                ctx.font = `${isMethodAbstract ? 'italic ' : ''}14px Inter`;
+                ctx.fillText(formatMember(method), cls.x + PADDING, y);
+            });
+        }
+        
+        function formatMember(member) {
+            const visibilityMap = {'+': '+', '-': '-', '#': '#', '~': '~'}
+            return `${visibilityMap[member.visibility] || '+'} ${member.name}`;
+        }
+
+        function drawRelationship(rel) {
+            const from = classes.find(c => c.id === rel.from);
+            const to = classes.find(c => c.id === rel.to);
+            if (!from || !to) return;
+            
+            // Find intersection points for cleaner lines
+            const fromPoint = getIntersectionPoint(from, to);
+            const toPoint = getIntersectionPoint(to, from);
+            
+            ctx.beginPath();
+            ctx.moveTo(fromPoint.x, fromPoint.y);
+            ctx.lineTo(toPoint.x, toPoint.y);
+
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 1.5;
+
+            if (rel.type === 'REALIZATION') {
+                ctx.setLineDash([8, 8]);
+            } else {
+                ctx.setLineDash([]);
+            }
+            ctx.stroke();
+
+            // Draw arrowhead
+            const angle = Math.atan2(toPoint.y - fromPoint.y, toPoint.x - fromPoint.x);
+            ctx.save();
+            ctx.translate(toPoint.x, toPoint.y);
+            ctx.rotate(angle);
+
+            switch (rel.type) {
+                case 'ASSOCIATION':
+                    drawAssociationArrow(ctx);
+                    break;
+                case 'INHERITANCE':
+                case 'REALIZATION':
+                    drawInheritanceArrow(ctx);
+                    break;
+                case 'AGGREGATION':
+                    drawAggregationDiamond(ctx, 'hollow');
+                    break;
+                case 'COMPOSITION':
+                    drawAggregationDiamond(ctx, 'filled');
+                    break;
+            }
+            ctx.restore();
+        }
+
+        function getIntersectionPoint(rect1, rect2) {
+            const center1 = { x: rect1.x + rect1.width / 2, y: rect1.y + rect1.height / 2 };
+            const center2 = { x: rect2.x + rect2.width / 2, y: rect2.y + rect2.height / 2 };
+            
+            const dx = center2.x - center1.x;
+            const dy = center2.y - center1.y;
+
+            let t = Infinity;
+            
+            // Top
+            if (dy < 0) t = Math.min(t, (rect1.y - center1.y) / dy);
+            // Bottom
+            if (dy > 0) t = Math.min(t, ((rect1.y + rect1.height) - center1.y) / dy);
+            // Left
+            if (dx < 0) t = Math.min(t, (rect1.x - center1.x) / dx);
+            // Right
+            if (dx > 0) t = Math.min(t, ((rect1.x + rect1.width) - center1.x) / dx);
+
+            return { x: center1.x + t * dx, y: center1.y + t * dy };
+        }
+
+        // --- Arrowhead Drawing Helpers ---
+        function drawAssociationArrow(context) {
+            context.beginPath();
+            context.moveTo(0, 0);
+            context.lineTo(-10, -8);
+            context.moveTo(0, 0);
+            context.lineTo(-10, 8);
+            context.stroke();
+        }
+
+        function drawInheritanceArrow(context) {
+            context.fillStyle = '#f8fafc'; // Match canvas background
+            context.beginPath();
+            context.moveTo(0, 0);
+            context.lineTo(-15, -10);
+            context.lineTo(-15, 10);
+            context.closePath();
+            context.fill();
+            context.stroke();
+        }
+        
+        function drawAggregationDiamond(context, type) {
+            context.fillStyle = type === 'filled' ? '#475569' : '#f8fafc';
+            context.beginPath();
+            context.moveTo(0, 0);
+            context.lineTo(-15, -10);
+            context.lineTo(-30, 0);
+            context.lineTo(-15, 10);
+            context.closePath();
+            context.fill();
+            context.stroke();
+        }
+        
+        
+        // --- Event Handlers ---
+        
+        // Tab switching
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.dataset.tab;
+                tabs.forEach(t => t.classList.remove('active', 'bg-indigo-50', 'text-indigo-600', 'border-indigo-500'));
+                tab.classList.add('active', 'bg-indigo-50', 'text-indigo-600', 'border-indigo-500');
+
+                tabContents.forEach(content => {
+                    if (content.id === `${tabName}-tab`) {
+                        content.classList.remove('hidden');
+                    } else {
+                        content.classList.add('hidden');
+                    }
+                });
+                if (tabName === 'manage' || tabName === 'relationships') {
+                    updateClassSelectors();
+                }
+                 if(tabName === 'manage') {
+                    classSelector.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+        tabs[0].click();
+
+        // Class creation
+        createClassBtn.addEventListener('click', () => {
+            const name = classNameInput.value.trim();
+            const type = classTypeSelect.value;
+            if (!name) {
+                showToast("Class name cannot be empty.", true);
+                return;
+            }
+            classes.push({
+                id: generateId(),
+                name,
+                type,
+                x: 50,
+                y: 50,
+                width: MIN_WIDTH,
+                height: 100,
+                attributes: [],
+                methods: []
+            });
+            classNameInput.value = '';
+            draw();
+            showToast(`Class '${name}' created.`);
+        });
+
+        // Class and Relationship selectors
+        function updateClassSelectors() {
+            const currentFrom = fromClassSelect.value;
+            const currentTo = toClassSelect.value;
+            const currentManager = classSelector.value;
+            
+            [classSelector, fromClassSelect, toClassSelect].forEach(sel => {
+                sel.innerHTML = '<option value="">-- Select a class --</option>';
+                classes.forEach(c => {
+                    const option = document.createElement('option');
+                    option.value = c.id;
+                    option.textContent = c.name;
+                    sel.appendChild(option);
+                });
+            });
+
+            fromClassSelect.value = currentFrom;
+            toClassSelect.value = currentTo;
+            classSelector.value = currentManager;
+        }
+
+        classSelector.addEventListener('change', () => {
+            const selectedId = classSelector.value;
+            if (selectedId) {
+                managementPanel.classList.remove('hidden');
+                updateManagementPanel(selectedId);
+            } else {
+                managementPanel.classList.add('hidden');
+            }
+        });
+
+        // Management panel logic
+        function updateManagementPanel(classId) {
+            const cls = classes.find(c => c.id === classId);
+            if (!cls) return;
+
+            const renderList = (list, type, el) => {
+                el.innerHTML = '';
+                if(list.length === 0) {
+                     el.innerHTML = `<li class="text-slate-400 italic">No ${type}s added.</li>`;
+                }
+                list.forEach((item, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'flex justify-between items-center bg-slate-100 p-1.5 rounded-md';
+                    li.innerHTML = `<span>${formatMember(item)}</span>
+                        <button data-type="${type}" data-index="${index}" class="text-red-500 hover:text-red-700 font-bold p-1 rounded-full hover:bg-red-100 w-6 h-6 flex items-center justify-center">&times;</button>`;
+                    el.appendChild(li);
+                });
+            };
+
+            renderList(cls.attributes, 'attribute', attributesList);
+            renderList(cls.methods, 'method', methodsList);
+        }
+
+        // Delete member
+        managementPanel.addEventListener('click', (e) => {
+            if(e.target.tagName === 'BUTTON' && e.target.dataset.index) {
+                const classId = classSelector.value;
+                const cls = classes.find(c => c.id === classId);
+                const type = e.target.dataset.type;
+                const index = parseInt(e.target.dataset.index);
+
+                if (type === 'attribute') {
+                    cls.attributes.splice(index, 1);
+                } else if (type === 'method') {
+                    cls.methods.splice(index, 1);
+                }
+                updateManagementPanel(classId);
+                draw();
+                showToast("Member removed.");
+            }
+        });
+
+
+        memberTypeSelect.addEventListener('change', () => {
+            methodOptionsDiv.classList.toggle('hidden', memberTypeSelect.value !== 'method');
+        });
+
+        addMemberBtn.addEventListener('click', () => {
+            const classId = classSelector.value;
+            const cls = classes.find(c => c.id === classId);
+            if (!cls) return;
+
+            const type = memberTypeSelect.value;
+            const visibility = memberVisibilitySelect.value;
+            const name = memberNameInput.value.trim();
+
+            if (!name) {
+                showToast("Member name cannot be empty.", true);
+                return;
+            }
+
+            const newMember = {
+                visibility,
+                name
+            };
+
+            if (type === 'method') {
+                newMember.isAbstract = isAbstractMethodCheckbox.checked;
+                cls.methods.push(newMember);
+            } else {
+                cls.attributes.push(newMember);
+            }
+
+            memberNameInput.value = '';
+            isAbstractMethodCheckbox.checked = false;
+            updateManagementPanel(classId);
+            draw();
+            showToast("Member added.");
+        });
+        
+        // Auto-check abstract for interfaces
+        classSelector.addEventListener('change', () => {
+            const selectedClass = classes.find(c => c.id === classSelector.value);
+            if(selectedClass && selectedClass.type === 'INTERFACE') {
+                isAbstractMethodCheckbox.checked = true;
+                isAbstractMethodCheckbox.disabled = true;
+            } else {
+                 isAbstractMethodCheckbox.disabled = false;
+            }
+        });
+
+
+        deleteClassBtn.addEventListener('click', () => {
+            const classId = classSelector.value;
+            if (!classId) return;
+
+            const className = classes.find(c => c.id === classId)?.name;
+            classes = classes.filter(c => c.id !== classId);
+            relationships = relationships.filter(r => r.from !== classId && r.to !== classId);
+            
+            updateClassSelectors();
+            classSelector.dispatchEvent(new Event('change'));
+            draw();
+            showToast(`Class '${className}' deleted.`, true);
+        });
+
+        // Relationship creation
+        createRelationshipBtn.addEventListener('click', () => {
+            const from = fromClassSelect.value;
+            const to = toClassSelect.value;
+            const type = relationshipTypeSelect.value;
+
+            if (!from || !to) {
+                showToast("Both 'From' and 'To' classes must be selected.", true);
+                return;
+            }
+            if(from === to) {
+                 showToast("Cannot create a relationship to the same class.", true);
+                return;
+            }
+
+            relationships.push({
+                from,
+                to,
+                type
+            });
+            draw();
+            showToast("Relationship created.");
+        });
+
+        // Canvas mouse events for dragging
+        canvas.addEventListener('mousedown', e => {
+            const mouseX = e.clientX - canvas.getBoundingClientRect().left;
+            const mouseY = e.clientY - canvas.getBoundingClientRect().top;
+
+            // Iterate backwards to select the top-most class
+            for (let i = classes.length - 1; i >= 0; i--) {
+                const cls = classes[i];
+                if (mouseX > cls.x && mouseX < cls.x + cls.width &&
+                    mouseY > cls.y && mouseY < cls.y + cls.height) {
+                    draggingClass = cls;
+                    offsetX = mouseX - cls.x;
+                    offsetY = mouseY - cls.y;
+                    
+                    // Move the selected class to the end of the array to draw it on top
+                    classes.push(classes.splice(i, 1)[0]);
+                    
+                    break;
+                }
+            }
+        });
+
+        canvas.addEventListener('mousemove', e => {
+            if (draggingClass) {
+                const mouseX = e.clientX - canvas.getBoundingClientRect().left;
+                const mouseY = e.clientY - canvas.getBoundingClientRect().top;
+                draggingClass.x = mouseX - offsetX;
+                draggingClass.y = mouseY - offsetY;
+                draw();
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            draggingClass = null;
+        });
+        
+        canvas.addEventListener('mouseleave', () => {
+             draggingClass = null;
+        });
+
+        // --- Data Management ---
+        function exportState() {
+            const state = {
+                classes,
+                relationships
+            };
+            const jsonString = JSON.stringify(state, null, 2);
+            jsonIOTextarea.value = jsonString;
+            return jsonString;
+        }
+
+        function importState(jsonString) {
+            try {
+                const state = JSON.parse(jsonString);
+                if (state.classes && state.relationships) {
+                    classes = state.classes;
+                    relationships = state.relationships;
+                    draw();
+                    updateClassSelectors();
+                    showToast("Diagram imported successfully.");
+                } else {
+                    showToast("Invalid JSON structure.", true);
+                }
+            } catch (error) {
+                showToast("Failed to parse JSON.", true);
+                console.error("JSON Parse Error:", error);
+            }
+        }
+        
+        exportJsonBtn.addEventListener('click', () => {
+            const jsonString = exportState();
+             // Clipboard fallback
+            const textarea = document.createElement('textarea');
+            textarea.value = jsonString;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast('Copied to clipboard!');
+            } catch (err) {
+                showToast('Failed to copy!', true);
+            }
+            document.body.removeChild(textarea);
+        });
+
+        importJsonBtn.addEventListener('click', () => {
+            const jsonString = jsonIOTextarea.value;
+            if (jsonString) {
+                importState(jsonString);
+            } else {
+                showToast("Text area is empty.", true);
+            }
+        });
+
+        saveLocalBtn.addEventListener('click', () => {
+            const jsonString = exportState();
+            localStorage.setItem('umlDiagramData', jsonString);
+            showToast("Diagram saved to local storage.");
+        });
+
+        loadLocalBtn.addEventListener('click', () => {
+            const jsonString = localStorage.getItem('umlDiagramData');
+            if (jsonString) {
+                importState(jsonString);
+            } else {
+                showToast("No data found in local storage.", true);
+            }
+        });
+
+    });
+    </script>
+</body>
+</html>
+
+
+
